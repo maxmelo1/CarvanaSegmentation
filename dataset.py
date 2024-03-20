@@ -27,7 +27,3 @@ class CustomDataset(Dataset):
             mask = augmentations["mask"]
 
         return image, mask
-
-    # def __iter__(self):
-    #     for i in range(0, len(self.images), self.bs): 
-    #         yield self.images[i:i+self.bs], self.masks[i:i+self.bs]
