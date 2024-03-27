@@ -36,3 +36,19 @@ class ImageToPatches(nn.Module):
         y = y.permute(0, 2, 1)
         # y = y.view(b, c, self.patch_size, self.patch_size, -1).permute(0, 4, 1, 2, 3)
         return y
+    
+
+class PatchEmbedding(nn.Module):
+    def __init__(self, in_channels, embed_size):
+        super().__init__()
+        self.in_channels = in_channels
+        self.embed_size = embed_size
+        # A single Layer is used to map all input patches to the output embedding dimension.
+        # i.e. each image patch will share the weights of this embedding layer.
+        self.embed_layer = nn.Linear(in_features=in_channels, out_features=embed_size)
+    
+    def forward(self, x):
+        assert len(x.size()) == 3
+        B, T, C = x.size()
+        x = self.embed_layer(x)
+        return x

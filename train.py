@@ -14,7 +14,7 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from models import ImageToPatches
+from models import ImageToPatches, PatchEmbedding
 # from model import UNET
 from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoint, save_predictions_as_imgs
 
@@ -142,8 +142,24 @@ def main():
 
     # im = im.detach().cpu().numpy()
     
+    imgps = ImageToPatches(args.image_height, 16)(im)
+    pemb = PatchEmbedding(768, 256)
 
-    print(ImageToPatches(args.image_height, 16)(im).size())
+    # import matplotlib.pyplot as plt
+
+    # plt.imshow((im[0].permute(1, 2, 0).detach().cpu().numpy()*255).astype(np.uint8))
+    # plt.show()
+    img0 = imgps[0][0].view(3, 16, 16).permute(1, 2, 0).detach().cpu().numpy()*255
+    # for im_patch in imgps[0]:
+    #     im_patch = im_patch.view(3, 16, 16).permute(1, 2, 0).detach().cpu().numpy()*255
+    #     plt.imshow(im_patch.astype(np.uint8))
+    #     plt.show()
+
+    embd = pemb(imgps)
+
+    print(im.size())
+    print(imgps.size())
+    print(embd.size())
 
 
 if __name__ == "__main__":
