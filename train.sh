@@ -1,0 +1,1 @@
+python train.py --image-dir ../carvana_segmentation/data2/train --mask-dir ../carvana_segmentation/data2/train_masks
