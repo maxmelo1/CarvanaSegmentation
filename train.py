@@ -14,7 +14,7 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from models import ImageToPatches, PatchEmbedding
+from models import ImageToPatches, PatchEmbedding, VisionTransformer
 # from model import UNET
 from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoint, save_predictions_as_imgs
 
@@ -155,11 +155,16 @@ def main():
     #     plt.imshow(im_patch.astype(np.uint8))
     #     plt.show()
 
-    embd = pemb(imgps)
+    
 
     print(im.size())
     print(imgps.size())
+    
+    embd = pemb(imgps)
     print(embd.size())
+
+    vit = VisionTransformer(args.image_height, 16, 3, 256)
+    print(vit(im).size())
 
 
 if __name__ == "__main__":

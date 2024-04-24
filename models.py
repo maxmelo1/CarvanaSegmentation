@@ -52,3 +52,18 @@ class PatchEmbedding(nn.Module):
         B, T, C = x.size()
         x = self.embed_layer(x)
         return x
+    
+class VisionTransformer(nn.Module):
+    def __init__(self, image_size, patch_size, in_channels, embedding_size):
+        super().__init__()
+        self.i2p = ImageToPatches(image_size, patch_size)
+        self.pe  = PatchEmbedding(patch_size*patch_size*in_channels, embedding_size)
+        num_patches = (image_size // patch_size)**2
+        self.position_embedding = nn.Parameter(torch.randn(num_patches, embedding_size))
+
+    def forward(self, x):
+        x   = self.i2p(x)
+        x   = self.pe(x)
+        
+        return x + self.position_embedding
+        
