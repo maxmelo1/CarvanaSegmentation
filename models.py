@@ -80,3 +80,19 @@ class MLP(nn.Module):
 
     def forward(self, x):
         return self.layers(x)
+    
+class SelfAttention(nn.Module):
+    def __init__(self, embed_size, num_heads, dropout) -> None:
+        super().__init__()
+        self.embed_size = embed_size
+        self.layer_norm = nn.LayerNorm(embed_size)
+        self.mult_head_att = nn.MultiheadAttention(embed_size, num_heads, dropout, batch_first=True)
+        self.layer_norm2 = nn.LayerNorm(embed_size)
+        self.mlp = MLP(embed_size, dropout)
+
+    def forward(self, x):
+        y = self.layer_norm(x)
+        x = x + self.mult_head_att(y, y, y, need_weights=False)[0]
+        x = x + self.mlp(self.layer_norm2(x))
+
+        return x

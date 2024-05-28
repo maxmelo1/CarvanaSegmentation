@@ -14,7 +14,7 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP
+from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfAttention
 # from model import UNET
 from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoint, save_predictions_as_imgs
 
@@ -170,6 +170,10 @@ def main():
     mlp = MLP(vout.size(-1), dropout=0.2)
     mlpout = mlp(vout)
     print(mlpout.size())
+
+    att_block = SelfAttention(mlpout.size(-1), 8, dropout=0.2)
+    att_out = att_block(mlpout)
+    print(att_out.size())
 
 
 if __name__ == "__main__":
