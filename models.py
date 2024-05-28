@@ -67,3 +67,16 @@ class VisionTransformer(nn.Module):
         
         return x + self.position_embedding
         
+    
+class MLP(nn.Module):
+    def __init__(self, embed_size, dropout):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(embed_size, embed_size*4),
+            nn.GELU(),
+            nn.Linear(embed_size*4, embed_size),
+            nn.Dropout(p=dropout),
+        )
+
+    def forward(self, x):
+        return self.layers(x)

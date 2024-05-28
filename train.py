@@ -14,7 +14,7 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from models import ImageToPatches, PatchEmbedding, VisionTransformer
+from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP
 # from model import UNET
 from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoint, save_predictions_as_imgs
 
@@ -164,7 +164,12 @@ def main():
     print(embd.size())
 
     vit = VisionTransformer(args.image_height, 16, 3, 256)
-    print(vit(im).size())
+    vout = vit(im)
+    print(vout.size())
+
+    mlp = MLP(vout.size(-1), dropout=0.2)
+    mlpout = mlp(vout)
+    print(mlpout.size())
 
 
 if __name__ == "__main__":
