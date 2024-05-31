@@ -14,7 +14,7 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfAttention
+from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfAttention, OutputProjection
 # from model import UNET
 from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoint, save_predictions_as_imgs
 
@@ -157,6 +157,7 @@ def main():
 
     
 
+    print('image size')
     print(im.size())
     print(imgps.size())
     
@@ -174,6 +175,10 @@ def main():
     att_block = SelfAttention(mlpout.size(-1), 8, dropout=0.2)
     att_out = att_block(mlpout)
     print(att_out.size())
+
+    projection = OutputProjection(im.size(-1), 16, 256, 3)
+    out_proj = projection(att_out)
+    print(out_proj.size())
 
 
 if __name__ == "__main__":

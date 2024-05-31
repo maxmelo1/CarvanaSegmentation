@@ -96,3 +96,20 @@ class SelfAttention(nn.Module):
         x = x + self.mlp(self.layer_norm2(x))
 
         return x
+    
+class OutputProjection(nn.Module):
+    def __init__(self, image_size, patch_size, embd_size, out_dim):
+        super().__init__()
+        self.patch = patch_size
+        self.out_dim = out_dim
+        self.proj = nn.Linear(embd_size, patch_size*patch_size*out_dim)
+        self.fold = nn.Fold(output_size=(image_size, image_size), kernel_size=patch_size, stride=patch_size)
+
+    def forward(self, x):
+        B, T, C = x.shape
+        x = self.proj(x) # B x T x Patch_size**2 x OutDIm
+
+        x = x.permute(0, 2, 1)
+        x = self.fold(x)
+
+        return x
