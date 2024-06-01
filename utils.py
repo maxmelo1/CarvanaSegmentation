@@ -173,5 +173,14 @@ def train_one_epoch(model, loss_fn, optim, loader, device, args):
     return torch.mean(torch.stack(loss))
 
 
+def get_model_parameters(m):
+    total_params = sum(
+        param.numel() for param in m.parameters()
+    )
+    return total_params
+
+def print_model_parameters(m):
+    num_model_parameters = get_model_parameters(m)
+    print(f"Parameters: {num_model_parameters/1e6:.2f}M")
 
     

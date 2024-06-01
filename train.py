@@ -14,9 +14,9 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfAttention, OutputProjection
+from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfAttention, OutputProjection, ViTSeg
 # from model import UNET
-from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoint, save_predictions_as_imgs
+from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoint, save_predictions_as_imgs, print_model_parameters
 
 
 def sorted_fns(dir):
@@ -68,6 +68,13 @@ def main():
     #image info
     parser.add_argument('--image-height', type=int, default=512)
     parser.add_argument('--image-width', type=int, default=512)
+    parser.add_argument('--patch_size', type=int, default=16)
+    parser.add_argument('--in_channels', type=int, default=3)
+    parser.add_argument('--out_channels', type=int, default=3)
+    parser.add_argument('--embed_size', type=int, default=768)
+    parser.add_argument('--num_blocks', type=int, default=12)
+    parser.add_argument('--num_heads', type=int, default=8)
+    parser.add_argument('--dropout', type=float, default=.2)
 
     parser.add_argument('--batch-size', type=int, default=8)
     parser.add_argument('--num-workers', type=int, default=2)
@@ -179,6 +186,11 @@ def main():
     projection = OutputProjection(im.size(-1), 16, 256, 3)
     out_proj = projection(att_out)
     print(out_proj.size())
+
+    vit = ViTSeg(args.image_height, args.patch_size, args.in_channels, args.out_channels, args.embed_size, args.num_blocks, args.num_heads, args.dropout ).cuda()
+    print_model_parameters(vit)
+    vit_out = vit(im.cuda())
+    print(vit_out.size())
 
 
 if __name__ == "__main__":
