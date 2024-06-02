@@ -36,9 +36,6 @@ def train(model, loss, optim, dl_train, dl_val, args):
     lowest_loss = 100000
     for epoch in range(args.NUM_EPOCHS):
 
-        ti = next(iter(dl_train))[0]
-        vi = next(iter(dl_val))[0]
-
         args.epoch = epoch
         l = train_one_epoch(model=model, loss_fn=loss, optim=optim, loader=dl_train, device=device, args=args)
 
@@ -46,16 +43,16 @@ def train(model, loss, optim, dl_train, dl_val, args):
         print("[%d/%d] - epoch end loss: %f"%(epoch,args.NUM_EPOCHS,avg_loss[-1]))
 
         metrics = check_accuracy(model, dl_val, loss, device, args=args)
-        val_loss.append(metrics[3])
+        val_loss.append(metrics['ValLoss'])
 
-        print(f"[{epoch}/{args.NUM_EPOCHS}] - Eval metrics -> acc: {metrics[0]}, Dice: {metrics[1]}, IOU: {metrics[2]}, val loss: {val_loss[-1]}")
+        print(f"[{epoch}/{args.NUM_EPOCHS}] - Eval metrics -> {metrics}")
         
         if val_loss[-1] < lowest_loss:
             lowest_loss = val_loss[-1]
             print('A better model was found! saving...')
 
             actual_state = {'optim':optim.state_dict(),'model':model.state_dict(),'epoch':epoch}
-            save_checkpoint(actual_state, "./saved_models", "best_model.pth")
+            save_checkpoint(actual_state, f"./saved_models/{args.model_name}/", "best_model.pth")
 
             save_predictions_as_imgs(model, dl_val)
 
@@ -66,7 +63,6 @@ def main():
     parser.add_argument('--image-dir', type=str, default="data2/train")
     parser.add_argument('--mask-dir', type=str, default="data2/train_masks")
 
-    #image info
     parser.add_argument('--image-height', type=int, default=512)
     parser.add_argument('--image-width', type=int, default=512)
     parser.add_argument('--patch_size', type=int, default=16)
@@ -77,6 +73,7 @@ def main():
     parser.add_argument('--num_heads', type=int, default=8)
     parser.add_argument('--dropout', type=float, default=.2)
 
+    parser.add_argument('--model-name', type=str, default='vit')
     parser.add_argument('--learning-rate', type=float, default=1e-4)
     parser.add_argument('--device', type=str, default='cuda')
 

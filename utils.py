@@ -80,7 +80,7 @@ def check_accuracy(model, loader, loss_fn, device="cuda", args=None):
                 preds = model(x)
                 
                 l = loss_fn(preds.squeeze(1), y)
-                loss.append(l.cpu().item())
+                loss.append(l)
 
                 preds = torch.sigmoid(preds)
                 preds = (preds > 0.5).float()
@@ -115,8 +115,9 @@ def check_accuracy(model, loader, loss_fn, device="cuda", args=None):
     # dice_score /= num_pixels
     # iou /= num_pixels
 
+    metrics = {'Acc': torch.stack(lacc).mean().cpu().item(), 'Dice': torch.stack(ldice_score).mean().cpu().item(), 'IoU': torch.stack(liou).mean().cpu().item(), 'ValLoss': torch.stack(loss).mean().cpu().item()}
 
-    return torch.stack(lacc).mean(), torch.stack(ldice_score).mean(), torch.stack(liou).mean(), np.mean(np.array(loss))
+    return metrics
 
 def save_predictions_as_imgs(
     model, loader, path="saved_images/", device="cuda"
@@ -169,7 +170,6 @@ def train_one_epoch(model, loss_fn, optim, loader, device, args):
             pbar.set_postfix(loss=l.cpu().item())
 
 
-    #return np.mean(np.array(loss))
     return torch.mean(torch.stack(loss))
 
 
