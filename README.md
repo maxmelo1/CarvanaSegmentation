@@ -8,8 +8,16 @@ Each image is stores in jpg format, with a respective .gif mask. Complete data c
 
 ## Models
 
-The base model in this repo is the standard UNet without any backbone. 
+The models in this repo are listed below.
+
+- UNet.
+- ViT.
 
 ## Evaluation
 
 ## Results
+
+| Model | IoU |
+|-------|-----|
+| UNet  | -   |
+| SegViT| 96.5|
