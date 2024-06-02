@@ -19,6 +19,7 @@ from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfA
 from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoint, save_predictions_as_imgs, print_model_parameters
 
 
+
 def sorted_fns(dir):
     return sorted(os.listdir(dir), key=lambda x: x.split('.')[0])
 
@@ -70,19 +71,27 @@ def main():
     parser.add_argument('--image-width', type=int, default=512)
     parser.add_argument('--patch_size', type=int, default=16)
     parser.add_argument('--in_channels', type=int, default=3)
-    parser.add_argument('--out_channels', type=int, default=3)
+    parser.add_argument('--out_channels', type=int, default=1)
     parser.add_argument('--embed_size', type=int, default=768)
     parser.add_argument('--num_blocks', type=int, default=12)
     parser.add_argument('--num_heads', type=int, default=8)
     parser.add_argument('--dropout', type=float, default=.2)
 
+    parser.add_argument('--learning-rate', type=float, default=1e-4)
+    parser.add_argument('--device', type=str, default='cuda')
+
     parser.add_argument('--batch-size', type=int, default=8)
     parser.add_argument('--num-workers', type=int, default=2)
+    parser.add_argument('--NUM_EPOCHS', type=int, default=50)
 
     args = parser.parse_args()
 
     image_dir   = args.image_dir
     mask_dir    = args.mask_dir
+
+    LEARNING_RATE = args.learning_rate
+
+    device = torch.device(args.device)
 
     image_ids = np.array([os.path.join(image_dir, x) for x in sorted_fns(image_dir)])
     mask_ids = np.array([os.path.join(mask_dir, x.replace(".jpg", "_mask.gif")) for x in sorted_fns(mask_dir)])
@@ -145,18 +154,18 @@ def main():
         shuffle=False,
     )
 
-    im, mask = next(iter(train_loader))
+    # im, mask = next(iter(train_loader))
 
     # im = im.detach().cpu().numpy()
     
-    imgps = ImageToPatches(args.image_height, 16)(im)
-    pemb = PatchEmbedding(768, 256)
+    # imgps = ImageToPatches(args.image_height, 16)(im)
+    # pemb = PatchEmbedding(768, 256)
 
     # import matplotlib.pyplot as plt
 
     # plt.imshow((im[0].permute(1, 2, 0).detach().cpu().numpy()*255).astype(np.uint8))
     # plt.show()
-    img0 = imgps[0][0].view(3, 16, 16).permute(1, 2, 0).detach().cpu().numpy()*255
+    # img0 = imgps[0][0].view(3, 16, 16).permute(1, 2, 0).detach().cpu().numpy()*255
     # for im_patch in imgps[0]:
     #     im_patch = im_patch.view(3, 16, 16).permute(1, 2, 0).detach().cpu().numpy()*255
     #     plt.imshow(im_patch.astype(np.uint8))
@@ -164,34 +173,39 @@ def main():
 
     
 
-    print('image size')
-    print(im.size())
-    print(imgps.size())
+    # print('image size')
+    # print(im.size())
+    # print(imgps.size())
     
-    embd = pemb(imgps)
-    print(embd.size())
+    # embd = pemb(imgps)
+    # print(embd.size())
 
-    vit = VisionTransformer(args.image_height, 16, 3, 256)
-    vout = vit(im)
-    print(vout.size())
+    # vit = VisionTransformer(args.image_height, 16, 3, 256)
+    # vout = vit(im)
+    # print(vout.size())
 
-    mlp = MLP(vout.size(-1), dropout=0.2)
-    mlpout = mlp(vout)
-    print(mlpout.size())
+    # mlp = MLP(vout.size(-1), dropout=0.2)
+    # mlpout = mlp(vout)
+    # print(mlpout.size())
 
-    att_block = SelfAttention(mlpout.size(-1), 8, dropout=0.2)
-    att_out = att_block(mlpout)
-    print(att_out.size())
+    # att_block = SelfAttention(mlpout.size(-1), 8, dropout=0.2)
+    # att_out = att_block(mlpout)
+    # print(att_out.size())
 
-    projection = OutputProjection(im.size(-1), 16, 256, 3)
-    out_proj = projection(att_out)
-    print(out_proj.size())
+    # projection = OutputProjection(im.size(-1), 16, 256, 3)
+    # out_proj = projection(att_out)
+    # print(out_proj.size())
 
-    vit = ViTSeg(args.image_height, args.patch_size, args.in_channels, args.out_channels, args.embed_size, args.num_blocks, args.num_heads, args.dropout ).cuda()
-    print_model_parameters(vit)
-    vit_out = vit(im.cuda())
-    print(vit_out.size())
+    # vit = ViTSeg(args.image_height, args.patch_size, args.in_channels, args.out_channels, args.embed_size, args.num_blocks, args.num_heads, args.dropout ).cuda()
+    # print_model_parameters(vit)
+    # vit_out = vit(im.cuda())
+    # print(vit_out.size())
 
+    model = ViTSeg(args.image_height, args.patch_size, args.in_channels, args.out_channels, args.embed_size, args.num_blocks, args.num_heads, args.dropout ).to(device)
+    loss_fn = nn.BCEWithLogitsLoss(reduction='mean')
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+
+    train(model, loss_fn, optimizer, train_loader, val_loader, args=args)
 
 if __name__ == "__main__":
     main()
