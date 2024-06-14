@@ -20,9 +20,6 @@ from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoin
 
 
 
-def sorted_fns(dir):
-    return sorted(os.listdir(dir), key=lambda x: x.split('.')[0])
-
 
 def train(model, loss, optim, dl_train, dl_val, args):
 
@@ -60,8 +57,10 @@ def train(model, loss, optim, dl_train, dl_val, args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--num-epochs', type=int, default=50)
-    parser.add_argument('--image-dir', type=str, default="data2/train")
-    parser.add_argument('--mask-dir', type=str, default="data2/train_masks")
+    parser.add_argument('--dataset-dir', type=str, default="../carvana_segmentation/data2/")
+    parser.add_argument('--dataset-split-dir', type=str, default="data/ImageSets/Segmentation")
+    parser.add_argument('--image-extension', type=str, default='.jpg')
+    parser.add_argument('--mask-extension', type=str, default='.gif')
 
     parser.add_argument('--image-height', type=int, default=512)
     parser.add_argument('--image-width', type=int, default=512)
@@ -83,17 +82,29 @@ def main():
 
     args = parser.parse_args()
 
-    image_dir   = args.image_dir
-    mask_dir    = args.mask_dir
+
+    dataset_dir = args.dataset_dir
+    split_dir   = args.dataset_split_dir
 
     LEARNING_RATE = args.learning_rate
 
     device = torch.device(args.device)
 
-    image_ids = np.array([os.path.join(image_dir, x) for x in sorted_fns(image_dir)])
-    mask_ids = np.array([os.path.join(mask_dir, x.replace(".jpg", "_mask.gif")) for x in sorted_fns(mask_dir)])
+    with open(os.path.join(split_dir, 'train.txt'), 'r') as f:
+        X_train = []
+        y_train  = []
+        for id in f:
+            X_train.append(os.path.join(dataset_dir, 'train', id.rstrip()+args.image_extension) )
+            y_train.append(os.path.join(dataset_dir, 'train_masks', id.rstrip()+'_mask'+args.mask_extension) )
+    
 
-    X_train, X_test, y_train, y_test = train_test_split(image_ids, mask_ids, test_size=0.33, random_state=42)
+    with open(os.path.join(split_dir, 'val.txt'), 'r') as f:
+        X_test = []
+        y_test  = []
+        for id in f:
+            X_test.append(os.path.join(dataset_dir, 'train', id.rstrip()+args.image_extension) )
+            y_test.append(os.path.join(dataset_dir, 'train_masks', id.rstrip()+'_mask'+args.mask_extension) )
+
 
     train_transform = A.Compose(
         [
