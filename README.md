@@ -20,4 +20,4 @@ The models in this repo are listed below.
 | Model | IoU |
 |-------|-----|
 | UNet  | -   |
-| SegViT| 96.5|
+| SegViT| 98.34|

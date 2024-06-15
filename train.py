@@ -16,7 +16,7 @@ from sklearn.model_selection import train_test_split
 
 from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfAttention, OutputProjection, ViTSeg
 # from model import UNET
-from utils import CustomDataset, train_one_epoch, check_accuracy, save_checkpoint, save_predictions_as_imgs, print_model_parameters
+from utils import CustomDataset, train_one_epoch, validate, save_checkpoint, save_predictions_as_imgs, print_model_parameters
 
 
 
@@ -39,7 +39,7 @@ def train(model, loss, optim, dl_train, dl_val, args):
         avg_loss.append(l)
         print("[%d/%d] - epoch end loss: %f"%(epoch,args.NUM_EPOCHS,avg_loss[-1]))
 
-        metrics = check_accuracy(model, dl_val, loss, device, args=args)
+        metrics = validate(model, dl_val, loss, device, args=args)
         val_loss.append(metrics['ValLoss'])
 
         print(f"[{epoch}/{args.NUM_EPOCHS}] - Eval metrics -> {metrics}")

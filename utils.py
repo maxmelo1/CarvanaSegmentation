@@ -61,7 +61,7 @@ def get_loaders(
 
     return train_loader, val_loader
 
-def check_accuracy(model, loader, loss_fn, device="cuda", args=None):
+def validate(model, loader, loss_fn, device="cuda", args=None):
     
     lacc = []
     ldice_score = []
