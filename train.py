@@ -16,7 +16,8 @@ from sklearn.model_selection import train_test_split
 
 from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfAttention, OutputProjection, ViTSeg
 # from model import UNET
-from utils import CustomDataset, train_one_epoch, validate, save_checkpoint, save_predictions_as_imgs, print_model_parameters
+from utils import CustomDataset, train_one_epoch, validate, save_checkpoint, save_predictions_as_imgs, print_model_parameters, plot_loss
+
 
 
 
@@ -31,18 +32,18 @@ def train(model, loss, optim, dl_train, dl_val, args):
     avg_loss = []
     val_loss = []
     lowest_loss = 100000
-    for epoch in range(args.NUM_EPOCHS):
+    for epoch in range(args.num_epochs):
 
         args.epoch = epoch
         l = train_one_epoch(model=model, loss_fn=loss, optim=optim, loader=dl_train, device=device, args=args)
 
-        avg_loss.append(l)
-        print("[%d/%d] - epoch end loss: %f"%(epoch,args.NUM_EPOCHS,avg_loss[-1]))
+        avg_loss.append(l.cpu().item())
+        print("[%d/%d] - epoch end loss: %f"%(epoch,args.num_epochs,avg_loss[-1]))
 
         metrics = validate(model, dl_val, loss, device, args=args)
         val_loss.append(metrics['ValLoss'])
 
-        print(f"[{epoch}/{args.NUM_EPOCHS}] - Eval metrics -> {metrics}")
+        print(f"[{epoch+1}/{args.num_epochs}] - Eval metrics -> {metrics}")
         
         if val_loss[-1] < lowest_loss:
             lowest_loss = val_loss[-1]
@@ -52,6 +53,8 @@ def train(model, loss, optim, dl_train, dl_val, args):
             save_checkpoint(actual_state, f"./saved_models/{args.model_name}/", "best_model.pth")
 
             save_predictions_as_imgs(model, dl_val)
+
+    plot_loss(args, avg_loss, val_loss)
 
     
 def main():
@@ -78,7 +81,6 @@ def main():
 
     parser.add_argument('--batch-size', type=int, default=8)
     parser.add_argument('--num-workers', type=int, default=2)
-    parser.add_argument('--NUM_EPOCHS', type=int, default=50)
 
     args = parser.parse_args()
 

@@ -6,6 +6,7 @@ import numpy as np
 from tqdm import tqdm
 import os
 from PIL import Image
+import matplotlib.pyplot as plt
 
 PALETTE_PRED = [0,0,0, 255, 0, 0]
 PALETTE_GT = [0,0,0, 255, 0, 0]
@@ -72,8 +73,8 @@ def validate(model, loader, loss_fn, device="cuda", args=None):
     loss = []
 
     with torch.no_grad():
-        with tqdm(total=len(loader), desc=f'Epoch {args.epoch + 1}/{args.NUM_EPOCHS}', unit='batch') as pbar:
-            pbar.set_description(f'Validating epoch {args.epoch}/{args.NUM_EPOCHS}')
+        with tqdm(total=len(loader), desc=f'Epoch {args.epoch + 1}/{args.num_epochs}', unit='batch') as pbar:
+            pbar.set_description(f'Validating epoch {args.epoch}/{args.num_epochs}')
             for x, y in loader:
                 x = x.to(device)
                 y = y.to(device)
@@ -151,8 +152,8 @@ def save_predictions_as_imgs(
 def train_one_epoch(model, loss_fn, optim, loader, device, args):
     loss = []
     model.train()
-    with tqdm(total=len(loader), desc=f'Epoch {args.epoch + 1}/{args.NUM_EPOCHS}', unit='batch') as pbar:
-        pbar.set_description(f'Epoch {args.epoch}/{args.NUM_EPOCHS}')
+    with tqdm(total=len(loader), desc=f'Epoch {args.epoch + 1}/{args.num_epochs}', unit='batch') as pbar:
+        pbar.set_description(f'Epoch {args.epoch}/{args.num_epochs}')
         for X,y in loader:
             X = X.to(device, dtype=torch.float32)
             y = y.to(device, dtype=torch.float32)
@@ -183,4 +184,13 @@ def print_model_parameters(m):
     num_model_parameters = get_model_parameters(m)
     print(f"Parameters: {num_model_parameters/1e6:.2f}M")
 
-    
+
+def plot_loss(args, train_loss, val_loss):
+    if not os.path.exists(f"./saved_models/{args.model_name}/images/"):
+        os.makedirs(f"./saved_models/{args.model_name}/images/", exist_ok=True)
+
+    x = np.arange(0, len(train_loss), 1)
+    plt.plot(x, train_loss, label='Train loss')
+    plt.plot(x, val_loss, label='Validation loss')
+    plt.legend()
+    plt.savefig(f"./saved_models/{args.model_name}/images/loss.png")
