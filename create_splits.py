@@ -27,7 +27,7 @@ def main():
     size = len(image_ids)
 
     indices = np.random.permutation(size)
-    train_idx, val_idx, test_idx = indices[:int(size*train_size)], indices[:int(size*val_size)], indices[:int(size*test_size)]
+    train_idx, val_idx, test_idx = indices[:int(size*train_size)], indices[int(size*train_size):int(size*train_size+size*val_size)], indices[int(size*train_size+size*val_size):]
     X_train, X_val, X_test = image_ids[train_idx], image_ids[val_idx], image_ids[test_idx]
 
     print(f'Train samples: {len(X_train)}, Val samples: {len(X_val)}, Test samples: {len(X_test)}')
