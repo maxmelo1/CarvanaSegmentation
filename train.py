@@ -14,8 +14,8 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from models import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfAttention, OutputProjection, ViTSeg
-# from model import UNET
+from models.vision_transformer import ImageToPatches, PatchEmbedding, VisionTransformer, MLP, SelfAttention, OutputProjection, ViTSeg
+from models.unet import UNET
 from utils import CustomDataset, train_one_epoch, validate, save_checkpoint, save_predictions_as_imgs, print_model_parameters, plot_loss
 
 
@@ -76,6 +76,7 @@ def main():
     parser.add_argument('--dropout', type=float, default=.2)
 
     parser.add_argument('--model-name', type=str, default='vit')
+
     parser.add_argument('--learning-rate', type=float, default=1e-4)
     parser.add_argument('--device', type=str, default='cuda')
 
@@ -164,54 +165,11 @@ def main():
         shuffle=False,
     )
 
-    # im, mask = next(iter(train_loader))
-
-    # im = im.detach().cpu().numpy()
     
-    # imgps = ImageToPatches(args.image_height, 16)(im)
-    # pemb = PatchEmbedding(768, 256)
-
-    # import matplotlib.pyplot as plt
-
-    # plt.imshow((im[0].permute(1, 2, 0).detach().cpu().numpy()*255).astype(np.uint8))
-    # plt.show()
-    # img0 = imgps[0][0].view(3, 16, 16).permute(1, 2, 0).detach().cpu().numpy()*255
-    # for im_patch in imgps[0]:
-    #     im_patch = im_patch.view(3, 16, 16).permute(1, 2, 0).detach().cpu().numpy()*255
-    #     plt.imshow(im_patch.astype(np.uint8))
-    #     plt.show()
-
-    
-
-    # print('image size')
-    # print(im.size())
-    # print(imgps.size())
-    
-    # embd = pemb(imgps)
-    # print(embd.size())
-
-    # vit = VisionTransformer(args.image_height, 16, 3, 256)
-    # vout = vit(im)
-    # print(vout.size())
-
-    # mlp = MLP(vout.size(-1), dropout=0.2)
-    # mlpout = mlp(vout)
-    # print(mlpout.size())
-
-    # att_block = SelfAttention(mlpout.size(-1), 8, dropout=0.2)
-    # att_out = att_block(mlpout)
-    # print(att_out.size())
-
-    # projection = OutputProjection(im.size(-1), 16, 256, 3)
-    # out_proj = projection(att_out)
-    # print(out_proj.size())
-
-    # vit = ViTSeg(args.image_height, args.patch_size, args.in_channels, args.out_channels, args.embed_size, args.num_blocks, args.num_heads, args.dropout ).cuda()
-    # print_model_parameters(vit)
-    # vit_out = vit(im.cuda())
-    # print(vit_out.size())
-
-    model = ViTSeg(args.image_height, args.patch_size, args.in_channels, args.out_channels, args.embed_size, args.num_blocks, args.num_heads, args.dropout ).to(device)
+    if args.model_name == 'vit':
+        model = ViTSeg(args.image_height, args.patch_size, args.in_channels, args.out_channels, args.embed_size, args.num_blocks, args.num_heads, args.dropout ).to(device)
+    else:
+        model = UNET(args.in_channels, args.out_channels).to(device)
     loss_fn = nn.BCEWithLogitsLoss(reduction='mean')
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 

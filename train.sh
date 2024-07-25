@@ -1,1 +1,1 @@
-python train.py --image-dir ../carvana_segmentation/data2/train --mask-dir ../carvana_segmentation/data2/train_masks
+python train.py --num-epochs 50 --model-name unet --batch-size 4
