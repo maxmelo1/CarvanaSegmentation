@@ -52,7 +52,7 @@ def train(model, loss, optim, dl_train, dl_val, args):
             actual_state = {'optim':optim.state_dict(),'model':model.state_dict(),'epoch':epoch}
             save_checkpoint(actual_state, f"./saved_models/{args.model_name}/", "best_model.pth")
 
-            save_predictions_as_imgs(model, dl_val)
+            save_predictions_as_imgs(model, dl_val, f"./saved_models/{args.model_name}/saved_images/")
 
     plot_loss(args, avg_loss, val_loss)
 
@@ -67,12 +67,12 @@ def main():
 
     parser.add_argument('--image-height', type=int, default=512)
     parser.add_argument('--image-width', type=int, default=512)
-    parser.add_argument('--patch_size', type=int, default=16)
-    parser.add_argument('--in_channels', type=int, default=3)
-    parser.add_argument('--out_channels', type=int, default=1)
-    parser.add_argument('--embed_size', type=int, default=768)
-    parser.add_argument('--num_blocks', type=int, default=12)
-    parser.add_argument('--num_heads', type=int, default=8)
+    parser.add_argument('--patch-size', type=int, default=16)
+    parser.add_argument('--in-channels', type=int, default=3)
+    parser.add_argument('--out-channels', type=int, default=1)
+    parser.add_argument('--embed-size', type=int, default=768)
+    parser.add_argument('--num-blocks', type=int, default=12)
+    parser.add_argument('--num-heads', type=int, default=8)
     parser.add_argument('--dropout', type=float, default=.2)
 
     parser.add_argument('--model-name', type=str, default='vit')
